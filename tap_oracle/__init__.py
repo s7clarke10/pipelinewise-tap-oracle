@@ -189,15 +189,17 @@ def get_database_name(connection):
    rows = cur.execute("SELECT name FROM v$database").fetchall()
    return rows[0][0]
 
-def produce_column_metadata(connection, table_info, table_schema, table_name, pk_constraints, column_schemas, cols):
+def produce_column_metadata(connection, table_info, table_schema, table_name, pk_constraints, column_schemas, cols, filter_schemas):
    mdata = {}
 
    table_pks = pk_constraints.get(table_schema, {}).get(table_name, [])
 
    #NB> sadly, some system tables like XDB$STATS have P constraints for columns that do not exist so we must protect against this
    table_pks = list(filter(lambda pk: column_schemas.get(pk, Schema(None)).type is not None, table_pks))
-
-   database_name = get_database_name(connection)
+   
+   database_name = ""
+   if filter_schemas: database_name = filter_schemas
+   else: database_name = get_database_name(connection)
 
    metadata.write(mdata, (), 'table-key-properties', table_pks)
    metadata.write(mdata, (), 'schema-name', table_schema)
@@ -280,7 +282,8 @@ def discover_columns(connection, table_info, filter_schemas):
                                    table_name,
                                    pk_constraints,
                                    column_schemas,
-                                   cols)
+                                   cols,
+                                   filter_schemas)
 
       entry = CatalogEntry(
          table=table_name,

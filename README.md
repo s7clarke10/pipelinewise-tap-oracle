@@ -101,7 +101,8 @@ Running the the tap requires a `config.json` file. Example with the minimal sett
     "user": "my_user",
     "password": "password",
     "sid": "ORCL",
-    "filter_schemas": "MY_USER" # optional, note that when this is sent the database that is selected will use filter_schemas directly
+    "filter_schemas": "MY_USER", # optional, note that when this is sent the database that is selected will use filter_schemas directly
+    "turn_off_multipleof": true #optional, by default discovery will put multipleOf in each field to denote its type
   }
 ```
 

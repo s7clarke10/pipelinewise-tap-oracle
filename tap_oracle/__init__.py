@@ -68,7 +68,7 @@ def nullable_column(col_name, col_type, pks_for_table):
    else:
       return ['null', col_type]
 
-def schema_for_column(c, pks_for_table):
+def schema_for_column(c, pks_for_table, turn_off_multipleof):
    data_type = c.data_type.lower()
    result = Schema()
 
@@ -81,7 +81,7 @@ def schema_for_column(c, pks_for_table):
       result.maximum = (10**numeric_precision - 1)
 
       if numeric_scale < 0:
-         result.multipleOf = -10 * numeric_scale
+         if (turn_off_multipleof == False): result.multipleOf = 10 * numeric_scale
       return result
 
    elif data_type == 'number':
@@ -89,7 +89,7 @@ def schema_for_column(c, pks_for_table):
 
       result.exclusiveMaximum = True
       result.maximum = 10 ** (numeric_precision - numeric_scale)
-      result.multipleOf = 10 ** (0 - numeric_scale)
+      if (turn_off_multipleof == False): result.multipleOf = 10 ** (0 - numeric_scale)
       result.exclusiveMinimum = True
       result.minimum = -10 ** (numeric_precision - numeric_scale)
       return result
@@ -119,14 +119,14 @@ def schema_for_column(c, pks_for_table):
    #"real"
    elif data_type == 'float' and c.numeric_precision == 63:
       result.type = nullable_column(c.column_name, 'number', pks_for_table)
-      result.multipleOf = 10 ** -18
+      if (turn_off_multipleof == False): result.multipleOf = 10 ** -18
       return result
 
    #"float", "double_precision",
    elif data_type in ['float', 'double_precision']:
 
       result.type = nullable_column(c.column_name, 'number', pks_for_table)
-      result.multipleOf = 10 ** -38
+      if (turn_off_multipleof == False): result.multipleOf = 10 ** -38
       return result
 
    return Schema(None)
@@ -228,7 +228,7 @@ def produce_column_metadata(connection, table_info, table_schema, table_name, pk
 
    return mdata
 
-def discover_columns(connection, table_info, filter_schemas):
+def discover_columns(connection, table_info, filter_schemas, turn_off_multipleof):
    cur = connection.cursor()
    binds_sql = [":{}".format(b) for b in range(len(filter_schemas))]
    if binds_sql:
@@ -273,7 +273,7 @@ def discover_columns(connection, table_info, filter_schemas):
       (table_schema, table_name) = k
       pks_for_table = pk_constraints.get(table_schema, {}).get(table_name, [])
 
-      column_schemas = {c.column_name : schema_for_column(c, pks_for_table) for c in cols}
+      column_schemas = {c.column_name : schema_for_column(c, pks_for_table, turn_off_multipleof) for c in cols}
       schema = Schema(type='object', properties=column_schemas)
 
       md = produce_column_metadata(connection,
@@ -299,7 +299,7 @@ def discover_columns(connection, table_info, filter_schemas):
 def dump_catalog(catalog):
    catalog.dump()
 
-def do_discovery(conn_config, filter_schemas):
+def do_discovery(conn_config, filter_schemas, turn_off_multipleof):
    LOGGER.info("starting discovery")
    connection = orc_db.open_connection(conn_config)
    cur = connection.cursor()
@@ -346,7 +346,7 @@ def do_discovery(conn_config, filter_schemas):
         'is_view': True
      }
 
-   catalog = discover_columns(connection, table_info, filter_schemas)
+   catalog = discover_columns(connection, table_info, filter_schemas, turn_off_multipleof)
    dump_catalog(catalog)
    cur.close()
    connection.close()
@@ -548,11 +548,13 @@ def main_impl():
 
 
    if args.discover:
-      filter_schemas_prop = args.config.get('filter_schemas')
       filter_schemas = []
+      turn_off_multipleof = False
       if args.config.get('filter_schemas'):
          filter_schemas = args.config.get('filter_schemas').split(',')
-      do_discovery(conn_config, filter_schemas)
+      if args.config.get('turn_off_multipleof'):
+         turn_off_multipleof = args.config.get('turn_off_multipleof')
+      do_discovery(conn_config, filter_schemas, turn_off_multipleof)
 
    elif args.catalog:
       state = args.state

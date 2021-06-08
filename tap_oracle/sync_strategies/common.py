@@ -40,6 +40,11 @@ def row_to_singer_message(stream, row, version, columns, time_extracted):
       elif description == 'blob':
          base64encode = base64.b64encode(elem)
          row_to_persist += (base64encode,)
+      elif 'boolean' in property_type or property_type == 'boolean':
+         retval = False
+         if elem == 1: retval = True 
+         else: retval = False 
+         row_to_persist += (retval,)
       else:
          row_to_persist += (elem,)
 
@@ -55,6 +60,8 @@ def OutputTypeHandler(cursor, name, defaultType, size, precision, scale):
    if defaultType == cx_Oracle.NUMBER:
       return cursor.var(decimal.Decimal, arraysize = cursor.arraysize)
    if defaultType == cx_Oracle.CLOB:
+      return cursor.var(cx_Oracle.LONG_STRING, arraysize=cursor.arraysize)
+   if defaultType == cx_Oracle.NCLOB:
       return cursor.var(cx_Oracle.LONG_STRING, arraysize=cursor.arraysize)
    if defaultType == cx_Oracle.BLOB:
       return cursor.var(cx_Oracle.LONG_BINARY, arraysize=cursor.arraysize)

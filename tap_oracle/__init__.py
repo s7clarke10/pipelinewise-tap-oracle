@@ -45,6 +45,7 @@ STRING_TYPES = set([
     'varchar2',
     'nvarchar2',
     'clob',
+    'nclob',
     'blob',
 ])
 
@@ -76,7 +77,12 @@ def schema_for_column(c, pks_for_table, turn_off_multipleof):
 
    numeric_scale = c.numeric_scale or DEFAULT_NUMERIC_SCALE
    numeric_precision = c.numeric_precision or DEFAULT_NUMERIC_PRECISION
-   if data_type == 'number' and numeric_scale <= 0:
+   #Bool 
+   if data_type == 'number' and numeric_scale == 0 and numeric_precision == 1: 
+      result.type = nullable_column(c.column_name, 'boolean', pks_for_table)
+      return result
+
+   elif data_type == 'number' and numeric_scale <= 0:
       result.type = nullable_column(c.column_name, 'integer', pks_for_table)
       result.minimum = -1 * (10**numeric_precision - 1)
       result.maximum = (10**numeric_precision - 1)
@@ -95,9 +101,15 @@ def schema_for_column(c, pks_for_table, turn_off_multipleof):
       result.minimum = -10 ** (numeric_precision - numeric_scale)
       return result
 
-   elif data_type == 'date' or data_type.startswith("timestamp"):
+   elif data_type == 'date': 
       result.type = nullable_column(c.column_name, 'string', pks_for_table)
-
+      result.description = 'date'
+      result.format = 'date-time'
+      return result
+   
+   elif data_type.startswith("timestamp"):
+      result.type = nullable_column(c.column_name, 'string', pks_for_table)
+      result.description = 'timestamp'
       result.format = 'date-time'
       return result
    
@@ -105,6 +117,12 @@ def schema_for_column(c, pks_for_table, turn_off_multipleof):
       result.type = nullable_column(c.column_name, 'string', pks_for_table)
       result.maxLength = 4294967295 #Technically 4GB -1 https://docs.oracle.com/cd/E18283_01/server.112/e17110/limits001.htm 
       result.description = 'clob'
+      return result
+   
+   elif data_type == 'nclob':
+      result.type = nullable_column(c.column_name, 'string', pks_for_table)
+      result.maxLength = 4294967295 #Technically 4GB -1 https://docs.oracle.com/cd/E18283_01/server.112/e17110/limits001.htm 
+      result.description = 'nclob'
       return result
    
    elif data_type == 'blob':

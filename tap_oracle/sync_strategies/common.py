@@ -5,6 +5,7 @@ import decimal
 import datetime
 import dateutil.parser
 import cx_Oracle
+import base64
 
 def should_sync_column(metadata, field_name):
     field_metadata = metadata.get(('properties', field_name), {})
@@ -30,11 +31,20 @@ def row_to_singer_message(stream, row, version, columns, time_extracted):
    row_to_persist = ()
    for idx, elem in enumerate(row):
       property_type = stream.schema.properties[columns[idx]].type
+      description = stream.schema.properties[columns[idx]].description
       if elem is None:
          row_to_persist += (elem,)
       elif 'integer' in property_type or property_type == 'integer':
          integer_representation = int(elem)
          row_to_persist += (integer_representation,)
+      elif description == 'blob':
+         base64encode = base64.b64encode(elem)
+         row_to_persist += (base64encode,)
+      elif 'boolean' in property_type or property_type == 'boolean':
+         retval = False
+         if elem == 1: retval = True 
+         else: retval = False 
+         row_to_persist += (retval,)
       else:
          row_to_persist += (elem,)
 
@@ -49,13 +59,18 @@ def row_to_singer_message(stream, row, version, columns, time_extracted):
 def OutputTypeHandler(cursor, name, defaultType, size, precision, scale):
    if defaultType == cx_Oracle.NUMBER:
       return cursor.var(decimal.Decimal, arraysize = cursor.arraysize)
+   if defaultType == cx_Oracle.CLOB:
+      return cursor.var(cx_Oracle.LONG_STRING, arraysize=cursor.arraysize)
+   if defaultType == cx_Oracle.NCLOB:
+      return cursor.var(cx_Oracle.LONG_STRING, arraysize=cursor.arraysize)
+   if defaultType == cx_Oracle.BLOB:
+      return cursor.var(cx_Oracle.LONG_BINARY, arraysize=cursor.arraysize)
 
 
 def prepare_columns_sql(stream, c):
    column_name = """ "{}" """.format(c)
    if 'string' in stream.schema.properties[c].type and stream.schema.properties[c].format == 'date-time':
       return "to_char({})".format(column_name)
-
    return column_name
 
 def prepare_where_clause_arg(val, sql_datatype):

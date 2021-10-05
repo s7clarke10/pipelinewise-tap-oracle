@@ -162,6 +162,13 @@ def schema_for_column(c, pks_for_table, turn_off_multipleof):
 
    return Schema(None)
 
+def filter_sys_or_not(filter_schemas):
+    filter = "owner != 'SYS'"
+    if (filter_schemas[0] == 'SYS'): filter = "1=1"
+    return filter
+
+    
+
 def filter_schemas_sql_clause(sql, binds_sql, owner_schema=None):
    if binds_sql:
       if owner_schema:
@@ -176,13 +183,16 @@ def produce_row_counts(conn, filter_schemas):
    LOGGER.info("fetching row counts")
    cur = conn.cursor()
    row_counts = {}
+   filter = filter_sys_or_not(filter_schemas)
 
    binds_sql = [":{}".format(b) for b in range(len(filter_schemas))]
-   sql = filter_schemas_sql_clause("""
+   sql = filter_schemas_sql_clause(f"""
    SELECT table_name, num_rows
    FROM all_tables
-   WHERE owner != 'SYS'""", binds_sql)
+   WHERE {filter}""", binds_sql)
 
+   LOGGER.info("test")
+   LOGGER.info(sql)
    for row in cur.execute(sql, filter_schemas):
       row_counts[row[0]] = row[1] or 0
 
@@ -193,14 +203,19 @@ def produce_pk_constraints(conn, filter_schemas):
    cur = conn.cursor()
    pk_constraints = {}
 
+   #This is not great code, but didn't want to refactor
+   filter = filter_sys_or_not(filter_schemas)
+   if (filter == "1=1"): filter = ""
+   else: filter = f"AND cols.{filter}"
+
    binds_sql = [":{}".format(b) for b in range(len(filter_schemas))]
-   sql = filter_schemas_sql_clause("""
+   sql = filter_schemas_sql_clause(f"""
    SELECT cols.owner, cols.table_name, cols.column_name
    FROM all_constraints cons, all_cons_columns cols
    WHERE cons.constraint_type = 'P'
    AND cons.constraint_name = cols.constraint_name
    AND cons.owner = cols.owner
-   AND cols.owner != 'SYS'
+   {filter}
    """, binds_sql, "cols")
 
    for schema, table_name, column_name in cur.execute(sql, filter_schemas):
@@ -261,26 +276,27 @@ def produce_column_metadata(connection, table_info, table_schema, table_name, pk
 def discover_columns(connection, table_info, filter_schemas, turn_off_multipleof):
    cur = connection.cursor()
    binds_sql = [":{}".format(b) for b in range(len(filter_schemas))]
+   filter = filter_sys_or_not(filter_schemas)
    if binds_sql:
-      sql = """
+      sql = f"""
       SELECT OWNER,
              TABLE_NAME, COLUMN_NAME,
              DATA_TYPE, DATA_LENGTH,
              CHAR_LENGTH, CHAR_USED,
              DATA_PRECISION, DATA_SCALE
         FROM all_tab_columns
-       WHERE OWNER != 'SYS' AND owner IN ({})
+       WHERE {filter} AND owner IN ({{}})
        ORDER BY owner, table_name, column_name
       """.format(",".join(binds_sql))
    else:
-      sql = """
+      sql = f"""
       SELECT OWNER,
              TABLE_NAME, COLUMN_NAME,
              DATA_TYPE, DATA_LENGTH,
              CHAR_LENGTH, CHAR_USED,
              DATA_PRECISION, DATA_SCALE
         FROM all_tab_columns
-       WHERE OWNER != 'SYS'
+       WHERE {filter}
        ORDER BY owner, table_name, column_name
       """
 
@@ -338,12 +354,13 @@ def do_discovery(conn_config, filter_schemas, turn_off_multipleof):
    table_info = {}
 
    binds_sql = [":{}".format(b) for b in range(len(filter_schemas))]
+   filter = filter_sys_or_not(filter_schemas)
 
 
-   sql  = filter_schemas_sql_clause("""
+   sql  = filter_schemas_sql_clause(f"""
    SELECT owner, table_name
    FROM all_tables
-   WHERE owner != 'SYS'""", binds_sql)
+   WHERE {filter}""", binds_sql)
 
    LOGGER.info("fetching tables: %s %s", sql, filter_schemas)
    for row in cur.execute(sql, filter_schemas):
@@ -360,11 +377,12 @@ def do_discovery(conn_config, filter_schemas, turn_off_multipleof):
       }
 
 
-   sql = filter_schemas_sql_clause("""
+   sql = filter_schemas_sql_clause(f"""
    SELECT owner, view_name
    FROM sys.all_views
-   WHERE owner != 'SYS'""", binds_sql)
+   WHERE {filter}""", binds_sql)
 
+   LOGGER.info(sql)
    LOGGER.info("fetching views")
    for row in cur.execute(sql, filter_schemas):
      view_name = row[1]

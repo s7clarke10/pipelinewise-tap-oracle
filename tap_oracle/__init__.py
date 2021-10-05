@@ -191,8 +191,6 @@ def produce_row_counts(conn, filter_schemas):
    FROM all_tables
    WHERE {filter}""", binds_sql)
 
-   LOGGER.info("test")
-   LOGGER.info(sql)
    for row in cur.execute(sql, filter_schemas):
       row_counts[row[0]] = row[1] or 0
 
@@ -382,7 +380,6 @@ def do_discovery(conn_config, filter_schemas, turn_off_multipleof):
    FROM sys.all_views
    WHERE {filter}""", binds_sql)
 
-   LOGGER.info(sql)
    LOGGER.info("fetching views")
    for row in cur.execute(sql, filter_schemas):
      view_name = row[1]

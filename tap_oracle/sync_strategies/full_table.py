@@ -149,7 +149,8 @@ def sync_table(conn_config, stream, state, desired_columns):
       LOGGER.info("select %s", select_sql)
       for row in cur.execute(select_sql):
          ora_rowscn = row[-1]
-         row = row[:-1]
+         if USE_ORA_ROWSCN:
+           row = row[:-1]
          record_message = common.row_to_singer_message(stream,
                                                        row,
                                                        nascent_stream_version,

@@ -27,13 +27,22 @@ def send_schema_message(stream, bookmark_properties):
                                           bookmark_properties=bookmark_properties)
     singer.write_message(schema_message)
 
+# singer.decimal is defined as 100 digits plus a decimal point
+# NB: If a number exceeds this length, we should normalize it to attempt to persist properly.
+MAX_DECIMAL_DIGITS = 101
+
 def row_to_singer_message(stream, row, version, columns, time_extracted):
     row_to_persist = ()
     for idx, elem in enumerate(row):
         property_type = stream.schema.properties[columns[idx]].type
+        property_format = stream.schema.properties[columns[idx]].format
         description = stream.schema.properties[columns[idx]].description
         if elem is None:
             row_to_persist += (elem,)
+        elif ('string' in property_type or property_type == 'string') and property_format == 'singer.decimal':
+            if len(str(elem)) > MAX_DECIMAL_DIGITS:
+                elem = elem.normalize()
+            row_to_persist += (str(elem),)
         elif 'integer' in property_type or property_type == 'integer':
             integer_representation = int(elem)
             row_to_persist += (integer_representation,)

@@ -149,6 +149,17 @@ Support for a common user for working with pluggable databases (PDB). Every comm
 }
 ```
 
+Optional:
+
+A boolean setting: when enabled `true`, it outputs decimal and floating point numbers as strings to avoid loss of precision and scale.
+There are hints in the schema message, format = "singer.decimal", and additionalProperties scale_precision dictionary providing precision and scale. For decimal data, the target can use this 
+information to correctly replicate decimal data without loss. For the Floats and Number data type without precision and scale it is recommended that post processing formats the datatype based on an inspection of the data because the true data size is unknown / dynamic.
+
+```json
+{
+  "use_singer_decimal": true,
+}
+```
 
 ### To run tests:
 

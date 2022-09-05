@@ -76,7 +76,7 @@ def nullable_column(col_name, col_type, pks_for_table):
    else:
       return ['null', col_type]
 
-def schema_for_column(c, pks_for_table):
+def schema_for_column(c, pks_for_table, use_singer_decimal):
    # Return Schema(None) to avoid calling lower() on a column with no datatype
    if c.data_type is None:
       LOGGER.info('Skipping column %s since it had no datatype', c.column_name)
@@ -89,25 +89,29 @@ def schema_for_column(c, pks_for_table):
    numeric_scale = c.numeric_scale if c.numeric_scale is not None else DEFAULT_NUMERIC_SCALE
    # Precision is always non-zero and defaults to 38 digits
    numeric_precision = c.numeric_precision or DEFAULT_NUMERIC_PRECISION
-   #Bool 
-   if data_type == 'number' and numeric_scale == 0 and numeric_precision == 1: 
+   #Bool
+   if data_type == 'number' and numeric_scale == 0 and numeric_precision == 1:
       result.type = nullable_column(c.column_name, 'boolean', pks_for_table)
       return result
 
    elif data_type == 'number' and numeric_scale <= 0:
       result.type = nullable_column(c.column_name, 'integer', pks_for_table)
 
-      if numeric_scale < 0:
-         result.multipleOf = -10 * numeric_scale
       return result
 
    elif data_type == 'number':
-      result.type = nullable_column(c.column_name, 'number', pks_for_table)
-      result.multipleOf = 10 ** (0 - numeric_scale)
+      if use_singer_decimal: # Using custom `singer.decimal` string formatter, no opinion on scale/precision
+         result.type = nullable_column(c.column_name, 'string', pks_for_table)
+         result.format = "singer.decimal"
+         if not (  numeric_scale == DEFAULT_NUMERIC_SCALE and numeric_precision == DEFAULT_NUMERIC_PRECISION):
+            result.additionalProperties = {"scale_precision": f"({c.numeric_precision or DEFAULT_NUMERIC_PRECISION},{c.numeric_scale})"}
+      else:
+         result.type = nullable_column(c.column_name, 'number', pks_for_table)
+         result.multipleOf = 10 ** (0 - numeric_scale)
 
       return result
 
-   elif data_type == 'date': 
+   elif data_type == 'date':
       result.type = nullable_column(c.column_name, 'string', pks_for_table)
       result.description = 'date'
       result.format = 'date-time'
@@ -138,7 +142,11 @@ def schema_for_column(c, pks_for_table):
       return result
 
    elif data_type in FLOAT_TYPES:
-      result.type = nullable_column(c.column_name, 'number', pks_for_table)
+      if use_singer_decimal: # Using custom `singer.decimal` string formatter, no opinion on scale/precision
+         result.type = result.type = nullable_column(c.column_name, 'string', pks_for_table)
+         result.format = "singer.decimal"
+      else:
+         result.type = nullable_column(c.column_name, 'number', pks_for_table)
       return result
 
    elif data_type in STRING_TYPES:
@@ -155,15 +163,23 @@ def schema_for_column(c, pks_for_table):
 
    #"real"
    elif data_type == 'float' and c.numeric_precision == 63:
-      result.type = nullable_column(c.column_name, 'number', pks_for_table)
-      result.multipleOf = 10 ** -18
+      if use_singer_decimal: # Using custom `singer.decimal` string formatter, no opinion on scale/precision
+         result.type = result.type = nullable_column(c.column_name, 'string', pks_for_table)
+         result.format = "singer.decimal"
+      else:
+         result.type = nullable_column(c.column_name, 'number', pks_for_table)
+         result.multipleOf = 10 ** -18
       return result
 
    #"float", "double_precision",
    elif data_type in ['float', 'double_precision']:
 
-      result.type = nullable_column(c.column_name, 'number', pks_for_table)
-      result.multipleOf = 10 ** -38
+      if use_singer_decimal: # Using custom `singer.decimal` string formatter, no opinion on scale/precision
+         result.type = result.type = nullable_column(c.column_name, 'string', pks_for_table)
+         result.format = "singer.decimal"
+      else:
+         result.type = nullable_column(c.column_name, 'number', pks_for_table)
+         result.multipleOf = 10 ** -38
       return result
 
    return Schema(None)
@@ -276,7 +292,7 @@ def produce_column_metadata(connection, table_info, table_schema, table_name, pk
 
    return mdata
 
-def discover_columns(connection, table_info, filter_schemas, filter_tables):
+def discover_columns(connection, table_info, filter_schemas, filter_tables, use_singer_decimal):
    cur = connection.cursor()
    binds_sql = [":{}".format(b) for b in range(len(filter_schemas))]
    filter = filter_sys_or_not(filter_schemas)
@@ -328,7 +344,7 @@ def discover_columns(connection, table_info, filter_schemas, filter_tables):
       (table_schema, table_name) = k
       pks_for_table = pk_constraints.get(table_schema, {}).get(table_name, [])
 
-      column_schemas = {c.column_name : schema_for_column(c, pks_for_table) for c in cols}
+      column_schemas = {c.column_name : schema_for_column(c, pks_for_table, use_singer_decimal) for c in cols}
       schema = Schema(type='object', properties=column_schemas)
 
       md = produce_column_metadata(connection,
@@ -353,7 +369,7 @@ def discover_columns(connection, table_info, filter_schemas, filter_tables):
 def dump_catalog(catalog):
    catalog.dump()
 
-def do_discovery(conn_config, filter_schemas, filter_tables):
+def do_discovery(conn_config, filter_schemas, filter_tables, use_singer_decimal):
    LOGGER.info("starting discovery")
 
    connection = orc_db.open_connection(conn_config)
@@ -412,7 +428,7 @@ def do_discovery(conn_config, filter_schemas, filter_tables):
         'is_view': True
      }
 
-   catalog = discover_columns(connection, table_info, filter_schemas, filter_tables)
+   catalog = discover_columns(connection, table_info, filter_schemas, filter_tables, use_singer_decimal)
    dump_catalog(catalog)
    cur.close()
    connection.close()
@@ -631,6 +647,7 @@ def main_impl():
    if args.config.get('full_table_sync_batch_size'):
       full_table.BATCH_SIZE = int(args.config.get('full_table_sync_batch_size'))
    full_table.USE_ORA_ROWSCN = bool(args.config.get('use_ora_rowscn', True))
+   use_singer_decimal = bool(args.config.get('use_singer_decimal', False))
 
    if args.discover:
       filter_schemas_prop = args.config.get('filter_schemas')
@@ -648,7 +665,7 @@ def main_impl():
          if filter_tables[0] == "*.*":
             filter_tables = []
 
-      do_discovery(conn_config, filter_schemas, filter_tables)
+      do_discovery(conn_config, filter_schemas, filter_tables, use_singer_decimal)
 
    elif args.catalog:
       state = args.state

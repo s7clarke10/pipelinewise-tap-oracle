@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.7
+ * Bumping cx_Oracle to 8.2
+ * Removing unnecessary call to get the database name 
+
+## 1.1.6
+ * Added support to emit numeric data using the singer.decimal notation to avoid numeric rounding issues.
+ * To enable singer.decimal notation add the following config "use_singer_decimal": true
+
 ## 1.1.5
  * Large change to incorporate a number of cherry-picked features plus new features, table_filtering, no ora_rowscn full table loads.
    * Reverting commits for treating decimals and floats as singer.decimal.
@@ -12,9 +20,6 @@
    * Allow full_table with no ORA_ROWSCN and order by clause. Note: Not restartable.
    * Adding Datetime, Date, NCLOB, CLOB, and BLOB datatypes
    * Discovery filter to set tables via ENV `MELTANO_EXTRACT__SELECT` or config item `filter_tables`.
-
-
-
 
 ## 1.1.2
  * Log value of mine_sql [#30](https://github.com/singer-io/tap-oracle/pull/30)

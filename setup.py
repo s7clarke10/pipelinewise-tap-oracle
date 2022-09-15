@@ -18,7 +18,7 @@ setup(name='pipelinewise-tap-oracle',
       ],
       install_requires=[
           'singer-python==5.12.2',
-          'cx_Oracle==8.2',
+          'cx_Oracle==8.3',
           'strict-rfc3339==0.7'
       ],
       entry_points='''

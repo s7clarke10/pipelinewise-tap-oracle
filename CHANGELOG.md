@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.8
+ * Swapping singer-python for pipelinewise-singer-python
+ * This variant uses orjson for serializing 40-50x faster than other libraries.
+
 ## 1.1.7
  * Bumping cx_Oracle to 8.2
  * Removing unnecessary call to get the database name 

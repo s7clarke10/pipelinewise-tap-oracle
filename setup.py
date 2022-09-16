@@ -6,7 +6,7 @@ with open('README.md') as f:
       long_description = f.read()
 
 setup(name='pipelinewise-tap-oracle',
-      version='1.1.7',
+      version='1.1.8',
       description='Singer.io tap for extracting data from Oracle - PipelineWise compatible',
       long_description=long_description,
       long_description_content_type='text/markdown',
@@ -17,7 +17,7 @@ setup(name='pipelinewise-tap-oracle',
           'Programming Language :: Python :: 3 :: Only'
       ],
       install_requires=[
-          'singer-python==5.12.2',
+          'pipelinewise-singer-python @ git+https://github.com/mjsqu/pipelinewise-singer-python',
           'cx_Oracle==8.3',
           'strict-rfc3339==0.7'
       ],

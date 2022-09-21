@@ -654,6 +654,8 @@ def main_impl():
       full_table.BATCH_SIZE = int(args.config.get('full_table_sync_batch_size'))
    full_table.USE_ORA_ROWSCN = bool(args.config.get('use_ora_rowscn', True))
    use_singer_decimal = bool(args.config.get('use_singer_decimal', False))
+   incremental.OFFSET_VALUE = args.config.get('offset_value',0)
+
 
    if args.discover:
       filter_schemas_prop = args.config.get('filter_schemas')

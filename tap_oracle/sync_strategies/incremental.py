@@ -15,7 +15,8 @@ import cx_Oracle
 LOGGER = singer.get_logger()
 
 UPDATE_BOOKMARK_PERIOD = 1000
-
+# An offset value that can be configured to shift the incremental filter clause
+OFFSET_VALUE = 0
 
 def sync_table(conn_config, stream, state, desired_columns):
    connection = orc_db.open_connection(conn_config)
@@ -60,17 +61,18 @@ def sync_table(conn_config, stream, state, desired_columns):
 
    with metrics.record_counter(None) as counter:
       if replication_key_value:
-         LOGGER.info("Resuming Incremental replication from %s = %s", replication_key, replication_key_value)
+         LOGGER.info(f"Resuming Incremental replication from {replication_key} = {replication_key_value} + {OFFSET_VALUE}", replication_key, replication_key_value)
          casted_where_clause_arg = common.prepare_where_clause_arg(replication_key_value, replication_key_sql_datatype)
 
          select_sql      = """SELECT {}
                                 FROM {}.{}
-                               WHERE {} >= {}
+                               WHERE {} >= {} + {}
                                ORDER BY {} ASC
                                 """.format(','.join(escaped_columns),
                                            escaped_schema, escaped_table,
                                            replication_key, casted_where_clause_arg,
-                                           replication_key)
+                                           OFFSET_VALUE,replication_key
+                                           )
       else:
          select_sql      = """SELECT {}
                                 FROM {}.{}

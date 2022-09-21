@@ -316,7 +316,7 @@ def discover_columns(connection, table_info, filter_schemas, filter_tables, use_
              DATA_PRECISION, DATA_SCALE
         FROM all_tab_columns
        WHERE {filter} AND owner IN ({{}})
-       ORDER BY owner, table_name, column_name
+       ORDER BY owner, table_name, column_id
       """.format(",".join(binds_sql))
    else:
       sql = f"""
@@ -327,7 +327,7 @@ def discover_columns(connection, table_info, filter_schemas, filter_tables, use_
              DATA_PRECISION, DATA_SCALE
         FROM all_tab_columns
        WHERE {filter}
-       ORDER BY owner, table_name, column_name
+       ORDER BY owner, table_name, column_id
       """
 
    LOGGER.info("fetching column info")

@@ -316,7 +316,7 @@ def discover_columns(connection, table_info, filter_schemas, filter_tables, use_
              DATA_PRECISION, DATA_SCALE
         FROM all_tab_columns
        WHERE {filter} AND owner IN ({{}})
-       ORDER BY owner, table_name, column_name
+       ORDER BY owner, table_name, column_id
       """.format(",".join(binds_sql))
    else:
       sql = f"""
@@ -327,7 +327,7 @@ def discover_columns(connection, table_info, filter_schemas, filter_tables, use_
              DATA_PRECISION, DATA_SCALE
         FROM all_tab_columns
        WHERE {filter}
-       ORDER BY owner, table_name, column_name
+       ORDER BY owner, table_name, column_id
       """
 
    LOGGER.info("fetching column info")
@@ -501,7 +501,7 @@ def sync_method_for_streams(streams, state, default_replication_method):
 
       md_map = metadata.to_map(stream.metadata)
       desired_columns = [c for c in stream.schema.properties.keys() if common.should_sync_column(md_map, c)]
-      desired_columns.sort()
+      #desired_columns.sort()
 
       if len(desired_columns) == 0:
          LOGGER.warning('There are no columns selected for stream %s, skipping it', stream.tap_stream_id)
@@ -547,7 +547,7 @@ def sync_traditional_stream(conn_config, stream, state, sync_method, end_scn):
    LOGGER.info("Beginning sync of stream(%s) with sync method(%s)", stream.tap_stream_id, sync_method)
    md_map = metadata.to_map(stream.metadata)
    desired_columns = [c for c in stream.schema.properties.keys() if common.should_sync_column(md_map, c)]
-   desired_columns.sort()
+   #desired_columns.sort()
    if len(desired_columns) == 0:
       LOGGER.warning('There are no columns selected for stream %s, skipping it', stream.tap_stream_id)
       return state

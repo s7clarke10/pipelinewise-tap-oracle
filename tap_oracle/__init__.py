@@ -501,7 +501,7 @@ def sync_method_for_streams(streams, state, default_replication_method):
 
       md_map = metadata.to_map(stream.metadata)
       desired_columns = [c for c in stream.schema.properties.keys() if common.should_sync_column(md_map, c)]
-      desired_columns.sort()
+      #desired_columns.sort()
 
       if len(desired_columns) == 0:
          LOGGER.warning('There are no columns selected for stream %s, skipping it', stream.tap_stream_id)

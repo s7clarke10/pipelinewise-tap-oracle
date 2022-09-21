@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.9
+ * Pulling the database name from the env if v$database is unavailable.
+
 ## 1.1.8
  * Swapping singer-python for pipelinewise-singer-python
  * This variant uses orjson for serializing 40-50x faster than other libraries.

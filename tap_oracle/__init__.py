@@ -252,8 +252,12 @@ def produce_pk_constraints(conn, filter_schemas):
 def get_database_name(connection):
    cur = connection.cursor()
 
-   rows = cur.execute("SELECT name FROM v$database").fetchall()
-   return rows[0][0]
+   try:
+      rows = cur.execute("SELECT name FROM v$database").fetchall()
+      return rows[0][0]
+   except cx_Oracle.DatabaseError as ex:
+      rows = cur.execute("SELECT UPPER(sys_context('USERENV','DB_NAME')) AS DB_NAME FROM dual").fetchall()
+      return rows[0][0]
 
 def produce_column_metadata(connection, database_name, table_info, table_schema, table_name, pk_constraints, column_schemas, cols):
    mdata = {}

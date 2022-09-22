@@ -59,17 +59,19 @@ def sync_table(conn_config, stream, state, desired_columns):
    replication_key_value = singer.get_bookmark(state, stream.tap_stream_id, 'replication_key_value')
    replication_key_sql_datatype = md.get(('properties', replication_key)).get('sql-datatype')
 
+   typed_offset_value = OFFSET_VALUE
+   LOGGER.info(f"{replication_key_sql_datatype=}")
    if replication_key_sql_datatype == 'DATE' or replication_key_sql_datatype.startswith('TIMESTAMP'):
-      OFFSET_VALUE = f"INTERVAL '{OFFSET_VALUE}' SECOND"
+      typed_offset_value = f"INTERVAL '{OFFSET_VALUE}' SECOND"
 
    with metrics.record_counter(None) as counter:
       if replication_key_value:
-         LOGGER.info(f"Resuming Incremental replication from {replication_key} = {replication_key_value} + {OFFSET_VALUE}")
+         LOGGER.info(f"Resuming Incremental replication from {replication_key} = {replication_key_value} + {typed_offset_value}")
          casted_where_clause_arg = common.prepare_where_clause_arg(replication_key_value, replication_key_sql_datatype)
 
          select_sql      = f"""SELECT {','.join(escaped_columns)}
                                 FROM {escaped_schema}.{escaped_table}
-                               WHERE {replication_key} >= {casted_where_clause_arg} + {OFFSET_VALUE}
+                               WHERE {replication_key} >= {casted_where_clause_arg} + {typed_offset_value}
                                ORDER BY {replication_key} ASC
                                 """
       else:

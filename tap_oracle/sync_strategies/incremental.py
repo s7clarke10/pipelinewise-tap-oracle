@@ -61,7 +61,7 @@ def sync_table(conn_config, stream, state, desired_columns):
 
    with metrics.record_counter(None) as counter:
       if replication_key_value:
-         LOGGER.info(f"Resuming Incremental replication from {replication_key} = {replication_key_value} + {OFFSET_VALUE}", replication_key, replication_key_value)
+         LOGGER.info(f"Resuming Incremental replication from {replication_key} = {replication_key_value} + {OFFSET_VALUE}")
          casted_where_clause_arg = common.prepare_where_clause_arg(replication_key_value, replication_key_sql_datatype)
 
          select_sql      = """SELECT {}

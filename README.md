@@ -169,10 +169,10 @@ Using offset_value < 0 would result in an overlapping set of records being read 
 
 Using offset_value > 0 may result in data being missed. However it can be useful if a period (month-year) is being used. This prevents the tap from using period >= last-read-period and doubling up on the extract.
 
-Usage (offsetting by -ve 3 hours):
+Usage (offsetting by +1 days):
 ```json
 {
-  "offset_value": -10800
+  "offset_value": 1
 }
 ```
 

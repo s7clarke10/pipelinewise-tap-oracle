@@ -161,6 +161,21 @@ information to correctly replicate decimal data without loss. For the Floats and
 }
 ```
 
+Optional:
+
+To avoid problems with uncommitted changes being read, you can set `offset_value` to add to the value found in the STATE for INCREMENTAL loads. If the value provided is for a datetime replication key then the `offset_value` is read as seconds to offset by, otherwise the value is used as provided.
+
+Using offset_value < 0 would result in an overlapping set of records being read each time the tap is run.
+
+Using offset_value > 0 may result in data being missed. However it can be useful if a period (month-year) is being used. This prevents the tap from using period >= last-read-period and doubling up on the extract.
+
+Usage (offsetting by +1 days):
+```json
+{
+  "offset_value": 1
+}
+```
+
 ### To run tests:
 
 Tests require Oracle on Amazon RDS >= 12.1, and a user called `ROOT`.

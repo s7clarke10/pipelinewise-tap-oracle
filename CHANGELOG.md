@@ -7,6 +7,7 @@
 
 ## 1.2.0
  * New config option to provide an offset for incremental loads - offset_value.
+ * Changing the sort order to sort by the column_id so tables columns match the database source.
 
 ## 1.1.9
  * Pulling the database name from the env if v$database is unavailable.

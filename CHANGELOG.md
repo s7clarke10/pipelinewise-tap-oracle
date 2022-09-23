@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.1
+ * Applying cursor array_size to incremental and log_based.
+ * Renaming config parameter from `full_table_sync_batch_size` to `cursor_array_size`.
+ * Increasing the default array size from 100 to 1000.
+
+## 1.2.0
+ * New config option to provide an offset for incremental loads - offset_value.
+ * Changing the sort order to sort by the column_id so tables columns match the database source.
+
 ## 1.1.9
  * Pulling the database name from the env if v$database is unavailable.
 
@@ -8,7 +17,7 @@
  * This variant uses orjson for serializing 40-50x faster than other libraries.
 
 ## 1.1.7
- * Bumping cx_Oracle to 8.2
+ * Bumping cx_Oracle to 8.3
  * Removing unnecessary call to get the database name 
 
 ## 1.1.6

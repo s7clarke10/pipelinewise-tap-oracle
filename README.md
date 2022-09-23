@@ -104,6 +104,13 @@ Running the the tap requires a `config.json` file. Example with the minimal sett
   }
 ```
 
+Recommended optional settings
+
+* `"filter_schemas": "schema name"`   - This will speed up discover time as it only discovers the given schema.
+* `"filter_tables": ["SCHEMA-TABLE1", "SCHEMA-TABLE1"]` - this will speed up discovery to just the listed tables.
+* `"use_singer_decimal": true`        - This will help avoid numeric rounding issues emitting as a string with a format of singer.decimal.
+* `"cursor_array_size": 10000` - This will help speed up extracts over a WAN or low latency network. The default is 1000.
+
 Optional:
 
 For older database or connecting to an instance you can use the legacy SID for the connection.
@@ -173,6 +180,16 @@ Usage (offsetting by +1 day in seconds = 24*3600):
 ```json
 {
   "offset_value": 86400
+}
+```
+
+Optional:
+
+A numeric setting adjusting the internal buffersize. The common query tuning scenario is for SELECT statements that return a large number of rows over a slow network. Increasing arraysize can improve performance by reducing the number of round-trips to the database. However increasing this value increases the amount of memory required.
+
+```json
+{
+  "cursor_array_size": 10000,
 }
 ```
 

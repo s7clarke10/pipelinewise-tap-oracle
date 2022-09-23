@@ -15,7 +15,8 @@ import cx_Oracle
 LOGGER = singer.get_logger()
 
 UPDATE_BOOKMARK_PERIOD = 1000
-
+# An offset value that can be configured to shift the incremental filter clause
+OFFSET_VALUE = 0
 
 def sync_table(conn_config, stream, state, desired_columns):
    connection = orc_db.open_connection(conn_config)
@@ -58,26 +59,26 @@ def sync_table(conn_config, stream, state, desired_columns):
    replication_key_value = singer.get_bookmark(state, stream.tap_stream_id, 'replication_key_value')
    replication_key_sql_datatype = md.get(('properties', replication_key)).get('sql-datatype')
 
+   typed_offset_value = OFFSET_VALUE
+   LOGGER.info(f"{replication_key_sql_datatype=}")
+   if replication_key_sql_datatype == 'DATE' or replication_key_sql_datatype.startswith('TIMESTAMP'):
+      typed_offset_value = f"INTERVAL '{OFFSET_VALUE}' SECOND"
+
    with metrics.record_counter(None) as counter:
       if replication_key_value:
-         LOGGER.info("Resuming Incremental replication from %s = %s", replication_key, replication_key_value)
+         LOGGER.info(f"Resuming Incremental replication from {replication_key} = {replication_key_value} + {typed_offset_value}")
          casted_where_clause_arg = common.prepare_where_clause_arg(replication_key_value, replication_key_sql_datatype)
 
-         select_sql      = """SELECT {}
-                                FROM {}.{}
-                               WHERE {} >= {}
-                               ORDER BY {} ASC
-                                """.format(','.join(escaped_columns),
-                                           escaped_schema, escaped_table,
-                                           replication_key, casted_where_clause_arg,
-                                           replication_key)
+         select_sql      = f"""SELECT {','.join(escaped_columns)}
+                                FROM {escaped_schema}.{escaped_table}
+                               WHERE {replication_key} >= {casted_where_clause_arg} + {typed_offset_value}
+                               ORDER BY {replication_key} ASC
+                                """
       else:
-         select_sql      = """SELECT {}
-                                FROM {}.{}
-                               ORDER BY {} ASC
-                               """.format(','.join(escaped_columns),
-                                          escaped_schema, escaped_table,
-                                          replication_key)
+         select_sql      = f"""SELECT {','.join(escaped_columns)}
+                                FROM {escaped_schema}.{escaped_table}
+                               ORDER BY {replication_key} ASC
+                               """
 
       rows_saved = 0
       LOGGER.info("select %s", select_sql)

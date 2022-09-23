@@ -650,8 +650,10 @@ def main_impl():
       log_miner.DYNAMIC_SCN_WINDOW_SIZE = bool(args.config.get('logminer_dynamic_scn_window'))
    if args.config.get('logminer_iter_with_reduction_factor'):
       log_miner.ITER_WITH_REDUCTION_FACTOR = int(args.config.get('logminer_iter_with_reduction_factor'))
-   if args.config.get('full_table_sync_batch_size'):
-      full_table.BATCH_SIZE = int(args.config.get('full_table_sync_batch_size'))
+   if args.config.get('cursor_array_size'):
+      full_table.BATCH_SIZE = int(args.config.get('cursor_array_size'))
+      incremental.BATCH_SIZE = int(args.config.get('cursor_array_size'))
+      log_miner.BATCH_SIZE = int(args.config.get('cursor_array_size'))
    full_table.USE_ORA_ROWSCN = bool(args.config.get('use_ora_rowscn', True))
    use_singer_decimal = bool(args.config.get('use_singer_decimal', False))
    incremental.OFFSET_VALUE = args.config.get('offset_value',0)

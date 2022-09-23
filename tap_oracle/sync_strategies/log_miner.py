@@ -24,6 +24,7 @@ CALL_TIMEOUT = None
 DYNAMIC_SCN_WINDOW_SIZE = False
 ITER_WITH_REDUCTION_FACTOR = 10
 
+BATCH_SIZE = 1000
 
 def get_connection_with_common_user_or_default(conn_config):
     cdb_conn_config = conn_config.copy()
@@ -118,6 +119,7 @@ def sync_tables(conn_config, streams, state, end_scn, scn_window_size = None):
             """.format(stream.tap_stream_id))
 
    cur = connection.cursor()
+   cur.arraysize = BATCH_SIZE
    cur.execute("ALTER SESSION SET TIME_ZONE = '00:00'")
    cur.execute("""ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD"T"HH24:MI:SS."00+00:00"'""")
    cur.execute("""ALTER SESSION SET NLS_TIMESTAMP_FORMAT='YYYY-MM-DD"T"HH24:MI:SSXFF"+00:00"'""")

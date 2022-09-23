@@ -18,11 +18,14 @@ UPDATE_BOOKMARK_PERIOD = 1000
 # An offset value that can be configured to shift the incremental filter clause
 OFFSET_VALUE = 0
 
+BATCH_SIZE = 1000
+
 def sync_table(conn_config, stream, state, desired_columns):
    connection = orc_db.open_connection(conn_config)
    connection.outputtypehandler = common.OutputTypeHandler
 
    cur = connection.cursor()
+   cur.arraysize = BATCH_SIZE
    cur.execute("ALTER SESSION SET TIME_ZONE = '00:00'")
    cur.execute("""ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD"T"HH24:MI:SS."00+00:00"'""")
    cur.execute("""ALTER SESSION SET NLS_TIMESTAMP_FORMAT='YYYY-MM-DD"T"HH24:MI:SSXFF"+00:00"'""")

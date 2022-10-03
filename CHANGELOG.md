@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.2
+ * Handling NULL's / None in Singer.Decimal columns.
+
 ## 1.2.1
  * Applying cursor array_size to incremental and log_based.
  * Renaming config parameter from `full_table_sync_batch_size` to `cursor_array_size`.

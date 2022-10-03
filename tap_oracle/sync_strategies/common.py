@@ -42,7 +42,10 @@ def row_to_singer_message(stream, row, version, columns, time_extracted):
         elif ('string' in property_type or property_type == 'string') and property_format == 'singer.decimal':
             if len(str(elem)) > MAX_DECIMAL_DIGITS:
                 elem = elem.normalize()
-            row_to_persist += (str(elem),)
+            if elem is None:
+                row_to_persist += (elem,)
+            else:
+                row_to_persist += (str(elem),)
         elif 'integer' in property_type or property_type == 'integer':
             integer_representation = int(elem)
             row_to_persist += (integer_representation,)

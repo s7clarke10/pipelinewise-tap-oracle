@@ -10,7 +10,7 @@ import copy
 import pdb
 import time
 import decimal
-import cx_Oracle
+import oracledb
 
 LOGGER = singer.get_logger()
 

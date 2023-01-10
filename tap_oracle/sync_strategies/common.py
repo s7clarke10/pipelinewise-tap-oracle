@@ -4,7 +4,7 @@ from singer import  metadata
 import decimal
 import datetime
 import dateutil.parser
-import cx_Oracle
+import oracledb
 import base64
 
 def should_sync_column(metadata, field_name):
@@ -71,14 +71,14 @@ def row_to_singer_message(stream, row, version, columns, time_extracted):
        time_extracted=time_extracted)
 
 def OutputTypeHandler(cursor, name, defaultType, size, precision, scale):
-   if defaultType == cx_Oracle.NUMBER:
+   if defaultType == oracledb.NUMBER:
       return cursor.var(decimal.Decimal, arraysize = cursor.arraysize)
-   if defaultType == cx_Oracle.CLOB:
-      return cursor.var(cx_Oracle.LONG_STRING, arraysize=cursor.arraysize)
-   if defaultType == cx_Oracle.NCLOB:
-      return cursor.var(cx_Oracle.LONG_STRING, arraysize=cursor.arraysize)
-   if defaultType == cx_Oracle.BLOB:
-      return cursor.var(cx_Oracle.LONG_BINARY, arraysize=cursor.arraysize)
+   if defaultType == oracledb.CLOB:
+      return cursor.var(oracledb.LONG_STRING, arraysize=cursor.arraysize)
+   if defaultType == oracledb.NCLOB:
+      return cursor.var(oracledb.LONG_STRING, arraysize=cursor.arraysize)
+   if defaultType == oracledb.BLOB:
+      return cursor.var(oracledb.LONG_BINARY, arraysize=cursor.arraysize)
 
 
 def prepare_columns_sql(stream, c):

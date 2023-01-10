@@ -1,6 +1,6 @@
 import unittest
 import os
-import cx_Oracle, sys, string, datetime
+import oracledb, sys, string, datetime
 import tap_oracle
 
 import tap_oracle.sync_strategies.full_table as full_table

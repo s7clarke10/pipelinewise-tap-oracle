@@ -1,7 +1,7 @@
 from singer import get_logger, metadata
 from nose.tools import nottest
 
-import cx_Oracle
+import oracledb
 import singer
 import os
 import decimal
@@ -33,7 +33,7 @@ def get_test_connection():
     creds = get_test_conn_config()
     conn_string = '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={})(PORT={}))(CONNECT_DATA=(SID={})))'.format(creds['host'], creds['port'], creds['sid'])
 
-    conn = cx_Oracle.connect(creds['user'], creds['password'], conn_string)
+    conn = oracledb.connect(creds['user'], creds['password'], conn_string)
 
     return conn
 

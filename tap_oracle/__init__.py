@@ -255,7 +255,7 @@ def get_database_name(connection):
    try:
       rows = cur.execute("SELECT name FROM v$database").fetchall()
       return rows[0][0]
-   except orc_db.cx_Oracle.DatabaseError as ex:
+   except orc_db.oracledb.DatabaseError as ex:
       rows = cur.execute("SELECT UPPER(sys_context('USERENV','DB_NAME')) AS DB_NAME FROM dual").fetchall()
       return rows[0][0]
 

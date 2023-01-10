@@ -1,5 +1,5 @@
 import unittest
-import cx_Oracle, sys, string, datetime
+import oracledb, sys, string, datetime
 import tap_oracle
 import os
 import pdb

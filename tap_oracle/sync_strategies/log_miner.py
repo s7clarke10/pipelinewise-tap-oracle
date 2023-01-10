@@ -13,7 +13,7 @@ import pdb
 import pytz
 import time
 import tap_oracle.sync_strategies.common as common
-import cx_Oracle
+import oracledb
 
 LOGGER = singer.get_logger()
 
@@ -145,7 +145,7 @@ def sync_tables(conn_config, streams, state, end_scn, scn_window_size = None):
             if iter_with_reduction_factor == 0:
                 reduction_factor = max(0, reduction_factor - 1)
                 iter_with_reduction_factor = ITER_WITH_REDUCTION_FACTOR
-      except cx_Oracle.DatabaseError as ex:
+      except oracledb.DatabaseError as ex:
          cur.execute("DBMS_LOGMNR.END_LOGMNR()")
          cur.close()
          LOGGER.warning(f"Exception at start_scn={start_scn_window} stop_scn={stop_scn_window} reduction_factor={reduction_factor}")

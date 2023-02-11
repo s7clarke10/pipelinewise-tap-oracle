@@ -37,7 +37,7 @@ class readRedoThread(Thread):
  
   def run(self):
     #dsn = oracledb.makedsn('127.0.0.1', 1521, 'ORCL') 
-    conn = oracledb.connect('root', 'BiouTaSeCtOmPavA', '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SID=ORCL)))')
+    conn = oracledb.connect(user='root', password='BiouTaSeCtOmPavA', dsn='(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SID=ORCL)))')
     cursor = conn.cursor()
     contents = conn.cursor()
  
@@ -130,7 +130,7 @@ def get_logs(config):
     #endTime = datetime.datetime.now()
     #print(startTime)
 
-    conn = oracledb.connect(config["user"], config["password"], oracledb.makedsn(config["host"], config["port"], 'ORCL'))
+    conn = oracledb.connect(user=config["user"], password=config["password"], dsn=oracledb.makedsn(config["host"], config["port"], 'ORCL'))
     #conn = oracledb.connect(mode = oracledb.SYSDBA)
     cursor = conn.cursor()
     cursor.execute("select distinct thread# from v$archived_log where first_time >= :1 and next_time <= :2",[startTime,endTime])

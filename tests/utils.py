@@ -33,7 +33,7 @@ def get_test_connection():
     creds = get_test_conn_config()
     conn_string = '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={})(PORT={}))(CONNECT_DATA=(SID={})))'.format(creds['host'], creds['port'], creds['sid'])
 
-    conn = oracledb.connect(creds['user'], creds['password'], conn_string)
+    conn = oracledb.connect(user=creds['user'], password=creds['password'], dsn=conn_string)
 
     return conn
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.3
+ * Add tags to the record_count (database / schema)
+ * Adding logo for pipelinewise-tap-oracle
+ * Fix make sure key_properties is not null for views
+
 ## 1.2.2
  * Handling NULL's / None in Singer.Decimal columns.
 

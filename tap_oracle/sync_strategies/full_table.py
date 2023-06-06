@@ -58,6 +58,10 @@ def sync_view(conn_config, stream, state, desired_columns):
       singer.write_message(activate_version_message)
 
    with metrics.record_counter(None) as counter:
+     
+      counter.tags["schema"] = escaped_schema
+      counter.tags["table"] = escaped_table
+
       select_sql      = 'SELECT {} FROM {}.{}'.format(','.join(escaped_columns),
                                                       escaped_schema,
                                                       escaped_table)
@@ -121,6 +125,10 @@ def sync_table(conn_config, stream, state, desired_columns):
       singer.write_message(activate_version_message)
 
    with metrics.record_counter(None) as counter:
+     
+      counter.tags["schema"] = escaped_schema
+      counter.tags["table"] = escaped_table
+     
       ora_rowscn = singer.get_bookmark(state, stream.tap_stream_id, 'ORA_ROWSCN')
       if not USE_ORA_ROWSCN:
          # Warning there is not restart recovery if the ORA_ROWSCN is ignored.

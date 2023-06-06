@@ -208,7 +208,11 @@ def sync_tables_logminer(cur, streams, state, start_scn, end_scn):
       rows_saved = 0
       columns_for_record = desired_columns + ['scn', '_sdc_deleted_at']
       with metrics.record_counter(None) as counter:
-         LOGGER.info("Examing log for table %s", stream.tap_stream_id)
+         
+         counter.tags["schema"] = schema_name
+         counter.tags["table"] = stream.table
+         
+         LOGGER.info("Examining log for table %s", stream.tap_stream_id)
          common.send_schema_message(stream, ['lsn'])
          LOGGER.info("mine_sql=%s", mine_sql)
          for op, redo, scn, cscn, commit_ts, *col_vals in cur.execute(mine_sql, binds):

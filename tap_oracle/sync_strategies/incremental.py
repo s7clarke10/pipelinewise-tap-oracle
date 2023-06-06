@@ -68,6 +68,10 @@ def sync_table(conn_config, stream, state, desired_columns):
       typed_offset_value = f"INTERVAL '{OFFSET_VALUE}' SECOND"
 
    with metrics.record_counter(None) as counter:
+      
+      counter.tags["schema"] = escaped_schema
+      counter.tags["table"] = escaped_table
+      
       if replication_key_value:
          LOGGER.info(f"Resuming Incremental replication from {replication_key} = {replication_key_value} + {typed_offset_value}")
          casted_where_clause_arg = common.prepare_where_clause_arg(replication_key_value, replication_key_sql_datatype)

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.4
+ * Breaking Change! Removing logic to assuming an Oracle number(1) datatype is a boolean.
+
 ## 1.2.3
  * Add tags to the record_count (database / schema)
  * Adding logo for pipelinewise-tap-oracle

@@ -89,12 +89,7 @@ def schema_for_column(c, pks_for_table, use_singer_decimal):
    numeric_scale = c.numeric_scale if c.numeric_scale is not None else DEFAULT_NUMERIC_SCALE
    # Precision is always non-zero and defaults to 38 digits
    numeric_precision = c.numeric_precision or DEFAULT_NUMERIC_PRECISION
-   #Bool
-   if data_type == 'number' and numeric_scale == 0 and numeric_precision == 1:
-      result.type = nullable_column(c.column_name, 'boolean', pks_for_table)
-      return result
-
-   elif data_type == 'number' and numeric_scale <= 0:
+   if data_type == 'number' and numeric_scale <= 0:
       result.type = nullable_column(c.column_name, 'integer', pks_for_table)
 
       return result

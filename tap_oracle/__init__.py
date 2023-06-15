@@ -181,7 +181,7 @@ def schema_for_column(c, pks_for_table, use_singer_decimal):
 
 def filter_sys_or_not(filter_schemas):
     filter = "owner != 'SYS'"
-    if (filter_schemas[0] == 'SYS'): filter = "1=1"
+    if ('SYS' in filter_schemas): filter = "1=1"
     return filter
 
     

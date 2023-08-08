@@ -92,6 +92,26 @@ or
   pip install .
 ```
 
+### OS Setup
+
+Before you can use tap-oracle, you need to download and install Oracle Client software. This means downloading appropriate Oracle Client software, and configuring environment variables to point the Oracle Client software as per Oracle's software setup.
+
+The following script is an Example for running this tap in a Docker Container and it a snippet of code from a `Dockerfile`. An equivalent setup can be done as a one-off in a Linux Server by way of example with appropriate environment variables set in a .bash_profile or appropriate shell for your environment.
+
+```shell
+# Install the Oracle Client
+RUN mkdir /opt/oracle \
+    && cd ~ \
+    && curl -O https://download.oracle.com/otn_software/linux/instantclient/1912000/instantclient-basic-linux.x64-19.12.0.0.0dbru.zip \
+    && unzip instantclient-basic-linux.x64-19.12.0.0.0dbru.zip -d /opt/oracle \
+    && rm instantclient-basic-linux.x64-19.12.0.0.0dbru.zip
+
+# Set required Oracle Client environment variables
+ENV ORACLE_HOME="/opt/oracle/instantclient_19_12"
+ENV PATH="$PATH:$ORACLE_HOME" \
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ORACLE_HOME" \
+    TNS_ADMIN="$ORACLE_HOME/network/admin"
+```
 ### Configuration
 
 Running the the tap requires a `config.json` file. Example with the minimal settings:

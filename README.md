@@ -99,6 +99,14 @@ Before you can use tap-oracle, you need to download and install Oracle Client so
 The following script is an Example for running this tap in a Docker Container and it a snippet of code from a `Dockerfile`. An equivalent setup can be done as a one-off in a Linux Server by way of example with appropriate environment variables set in a .bash_profile or appropriate shell for your environment.
 
 ```shell
+# For more details on the Oracle CX_Oracle library refer to 
+# https://cx-oracle.readthedocs.io/en/latest/
+# Install the libaio1 library for the Oracle Client, unzip
+RUN apt-get update \
+    && apt-get install -y unzip libaio1 \
+    && apt-get clean \
+    && find /var/cache/apt/archives /var/lib/apt/lists -not -name lock -type f -delete
+
 # Install the Oracle Client
 RUN mkdir /opt/oracle \
     && cd ~ \

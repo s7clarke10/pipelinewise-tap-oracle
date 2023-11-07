@@ -98,6 +98,8 @@ Before you can use tap-oracle, you need to download and install Oracle Client so
 
 The following script is an Example for running this tap in a Docker Container and it a snippet of code from a `Dockerfile`. An equivalent setup can be done as a one-off in a Linux Server by way of example with appropriate environment variables set in a .bash_profile or appropriate shell for your environment.
 
+Note: The legacy cx_Oracle library is not available on MacOS. The setup.py will ignore installing the library for a MacOS, the ora_python_driver_type becomes mandatory with a value of thin or thick for the client mode.
+
 ```shell
 # For more details on the Oracle CX_Oracle library refer to 
 # https://cx-oracle.readthedocs.io/en/latest/

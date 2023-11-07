@@ -15,9 +15,9 @@ Copyright (c) 2020, Vitor Avancini
   limitations under the License.
 """
 import enum
-from singer import utils
+from singer import get_logger, utils
 
-LOGGER = singer.get_logger()
+LOGGER = get_logger()
 
 REQUIRED_CONFIG_KEYS = [
     'host',
@@ -104,23 +104,23 @@ args = utils.parse_args(REQUIRED_CONFIG_KEYS)
 # Set the environment variable ORA_PYTHON_DRIVER_TYPE to one of “cx”, “thin”, or “thick”:
 ORA_PYTHON_DRIVER_TYPE = args.config.get('ora_python_driver_type', 'cx').upper()
 if ORA_PYTHON_DRIVER_TYPE == OracleDriverType.CX_ORACLE:
-    logger.info("Running in cx mode")
+    LOGGER.info("Running in cx mode")
     description = (
         f"cx_oracle is no longer maintained, use python-oracledb"
         f"\n\nTo switch to python-oracledb set the environment variable ORA_PYTHON_DRIVER_TYPE=thin "
         f"\n\nDocumentation for python-oracledb can be found here: "
         f"https://oracle.github.io/python-oracledb/"
     )
-    logger.warning(description)
+    LOGGER.warning(description)
     import cx_Oracle as oracledb
 elif ORA_PYTHON_DRIVER_TYPE == OracleDriverType.THICK:
     import oracledb
-    logger.info("Running in thick mode")
+    LOGGER.info("Running in thick mode")
     oracledb.init_oracle_client()
 elif ORA_PYTHON_DRIVER_TYPE == OracleDriverType.THIN:
     import oracledb
     SQLNET_ORA_CONFIG = OracleNetConfig.from_env()
-    logger.info("Running in thin mode")
+    LOGGER.info("Running in thin mode")
 else:
     exc = (
         f"Invalid value set for ORA_PYTHON_DRIVER_TYPE\n"

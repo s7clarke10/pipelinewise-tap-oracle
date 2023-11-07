@@ -6,7 +6,7 @@ import os
 import decimal
 import math
 import datetime
-from tap_oracle.connection_helper import oracledb
+from tap_oracle.connection_helper import oracledb, SQLNET_ORA_CONFIG
 
 LOGGER = get_logger()
 
@@ -32,8 +32,14 @@ def get_test_conn_config():
 def get_test_connection():
     creds = get_test_conn_config()
     conn_string = '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={})(PORT={}))(CONNECT_DATA=(SID={})))'.format(creds['host'], creds['port'], creds['sid'])
-
-    conn = oracledb.connect(user=creds['user'], password=creds['password'], dsn=conn_string)
+    conn_config = {
+        'user': config["user"],
+        'password': config["password"],
+        'dsn': conn_string
+    }
+    if SQLNET_ORA_CONFIG is not None:
+        conn_config.update(SQLNET_ORA_CONFIG)
+    conn = oracledb.connect(**conn_config)
 
     return conn
 

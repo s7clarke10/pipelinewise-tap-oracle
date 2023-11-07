@@ -14,5 +14,12 @@ def make_dsn(config):
 
 def open_connection(config):
     LOGGER.info("dsn: %s", make_dsn(config))
-    conn = oracledb.connect(user=config["user"], password=config["password"], dsn=make_dsn(config))
+    conn_config = {
+        'user': config["user"],
+        'password': config["password"],
+        'dsn': make_dsn(config)
+    }
+    if SQLNET_ORA_CONFIG is not None:
+        conn_config.update(SQLNET_ORA_CONFIG)
+    conn = oracledb.connect(**conn_config)
     return conn

@@ -48,11 +48,10 @@ jobs:
         && rm instantclient-basic-linux.x64-19.12.0.0.0dbru.zip
     - name: Install tap in meltano
       run: |
-        apt-get update && apt-get install -y git
         pip install meltano
         meltano init testproj
         cd testproj
-        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml || /bin/cat /home/runner/work/pipelinewise-tap-oracle/pipelinewise-tap-oracle/testproj/.meltano/logs/pip/extractors/tap-oracle/pip.log
+        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml || cat /home/runner/work/pipelinewise-tap-oracle/pipelinewise-tap-oracle/testproj/.meltano/logs/pip/extractors/tap-oracle/pip.log
         meltano invoke tap-oracle --discover
       env:
         TAP_ORACLE_HOST: localhost
@@ -62,6 +61,6 @@ jobs:
         TAP_ORACLE_SERVICE_NAME: FREEPDB1
         TAP_ORACLE_ORA_PYTHON_DRIVER_TYPE: ${{ matrix.oracle-driver }}
         ORACLE_HOME: /opt/oracle/instantclient_19_12
-        PATH: $PATH:$ORACLE_HOME
+        #PATH: $PATH:$ORACLE_HOME
         LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$ORACLE_HOME
         TNS_ADMIN: $ORACLE_HOME/network/admin

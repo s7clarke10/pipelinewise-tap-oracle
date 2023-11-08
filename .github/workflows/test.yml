@@ -11,7 +11,7 @@ jobs:
       matrix:
         # python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         python-version: ["3.9"]
-        os: ["ubuntu-latest","macos-latest"]
+        os: ["ubuntu-latest"]
     services:
       oracle:
         #image: container-registry.oracle.com/database/express:21.3.0-xe
@@ -22,15 +22,6 @@ jobs:
           - 1521:1521
 
     steps:
-    - name: Setup docker (missing on MacOS)
-      if: runner.os == 'macos'
-      run: |
-        brew install docker
-        colima start
-      
-        # For testcontainers to find the Colima socket
-        # https://github.com/abiosoft/colima/blob/main/docs/FAQ.md#cannot-connect-to-the-docker-daemon-at-unixvarrundockersock-is-the-docker-daemon-running
-        sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
     - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4

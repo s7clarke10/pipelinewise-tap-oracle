@@ -35,8 +35,6 @@ jobs:
         meltano init testproj
         cd testproj
         meltano add extractor tap-oracle --from-ref ../tap-oracle.yml
-    - name: Run meltano invoke discover
-      run: |
         meltano invoke tap-oracle --discover
       env:
         TAP_ORACLE_HOST: localhost

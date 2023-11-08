@@ -29,17 +29,19 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install tap
+    - name: Install tap in meltano
       run: |
-        pip install .
-        pip install nose
-    - name: Run nosetests
+        pip install meltano
+        meltano init testproj
+        cd testproj
+        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml
+    - name: Run meltano invoke discover
       run: |
-        nosetests
+        meltano invoke tap-oracle --discover
       env:
-        TAP_ORACLE_HOSTNAME: localhost
+        TAP_ORACLE_HOST: localhost
         TAP_ORACLE_PORT: 1521
-        TAP_ORACLE_PASS: admin
+        TAP_ORACLE_PASSWORD: admin
         TAP_ORACLE_USER: SYS
         TAP_ORACLE_SERVICE_NAME: FREEPDB1
         TAP_ORACLE_ORA_PYTHON_DRIVER_TYPE: ${{ matrix.oracle-driver }}

@@ -1,0 +1,43 @@
+name: tap-oracle
+namespace: tap_oracle
+pip_url: ..
+variant: pipelinewise
+executable: tap-oracle
+capabilities:
+    - catalog
+    - discover
+    - properties
+    - state
+settings:
+    - name: host
+      kind: string
+    - name: port
+      kind: integer
+    - name: user
+      kind: string
+    - name: password
+      kind: password
+    - name: sid
+      kind: string
+    - name: service_name
+      kind: string
+    - name: common_user
+      kind: string
+    - name: common_password
+      kind: password
+    - name: common_service_name
+      kind: string
+    - name: filter_schemas
+      kind: string
+    - name: filter_tables
+      kind: string
+    - name: use_ora_rowscn
+      kind: boolean
+    - name: use_singer_decimal
+      kind: boolean
+    - name: offset_value
+      kind: integer
+    - name: cursor_array_size
+      kind: integer
+    - name: ora_python_driver_type
+      kind: string

@@ -51,7 +51,7 @@ jobs:
         pip install meltano
         meltano init testproj
         cd testproj
-        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml || cat /home/runner/work/pipelinewise-tap-oracle/pipelinewise-tap-oracle/testproj/.meltano/logs/pip/extractors/tap-oracle/pip.log
+        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml || /bin/cat /home/runner/work/pipelinewise-tap-oracle/pipelinewise-tap-oracle/testproj/.meltano/logs/pip/extractors/tap-oracle/pip.log
         meltano invoke tap-oracle --discover
       env:
         TAP_ORACLE_HOST: localhost

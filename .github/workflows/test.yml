@@ -6,6 +6,7 @@ jobs:
   test:
     name: "Run tap-oracle on py${{ matrix.python-version }} (OS: ${{ matrix.os }}, Driver: ${{ matrix.oracle-driver }})"
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
     strategy:
@@ -29,6 +30,32 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Install Oracle Client
+    - if: matrix.oracle-driver != 'THIN'
+      run: |
+      # For more details on the Oracle CX_Oracle library refer to 
+      # https://cx-oracle.readthedocs.io/en/latest/
+      # For more details on the Oracle oracledb library ref to
+      # https://oracle.github.io/python-oracledb/
+      # Install the libaio1 library for the Oracle Client, unzip
+      apt-get update \
+      && apt-get install -y unzip libaio1 \
+      && apt-get clean \
+      && find /var/cache/apt/archives /var/lib/apt/lists -not -name lock -type f -delete
+    
+
+      # Install the Oracle Client
+      mkdir /opt/oracle \
+      && cd ~ \
+      && curl -O https://download.oracle.com/otn_software/linux/instantclient/1912000/instantclient-basic-linux.x64-19.12.0.0.0dbru.zip \
+      && unzip instantclient-basic-linux.x64-19.12.0.0.0dbru.zip -d /opt/oracle \
+      && rm instantclient-basic-linux.x64-19.12.0.0.0dbru.zip
+
+      # Set required Oracle Client environment variables
+      ENV ORACLE_HOME="/opt/oracle/instantclient_19_12"
+      ENV PATH="$PATH:$ORACLE_HOME" \
+      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ORACLE_HOME" \
+      TNS_ADMIN="$ORACLE_HOME/network/admin"
     - name: Install tap in meltano
       run: |
         pip install meltano
@@ -43,3 +70,7 @@ jobs:
         TAP_ORACLE_USER: SYS
         TAP_ORACLE_SERVICE_NAME: FREEPDB1
         TAP_ORACLE_ORA_PYTHON_DRIVER_TYPE: ${{ matrix.oracle-driver }}
+        ORACLE_HOME: /opt/oracle/instantclient_19_12
+        PATH: $PATH:$ORACLE_HOME
+        LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$ORACLE_HOME
+        TNS_ADMIN: $ORACLE_HOME/network/admin

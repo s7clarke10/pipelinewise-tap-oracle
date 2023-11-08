@@ -3,7 +3,8 @@ name: Test tap-oracle
 on: [push]
 
 jobs:
-  pytest:
+  test:
+    name: "Run tap-oracle on py${{ matrix.python-version }} (OS: ${{ matrix.os }}, Driver: ${{ matrix.oracledriver }})"
     runs-on: ${{ matrix.os }}
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -12,6 +13,7 @@ jobs:
         # python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         python-version: ["3.9"]
         os: ["ubuntu-latest"]
+        oracle-driver: ["CX","THIN","THICK"]
     services:
       oracle:
         #image: container-registry.oracle.com/database/express:21.3.0-xe
@@ -27,18 +29,16 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Poetry
+    - name: Install tap
       run: |
-        pip install poetry
-    - name: Install dependencies
+        pip install .
+    - name: Run a test discovery
       run: |
-        poetry install
-    - name: Test with pytest
-      run: |
-        poetry run tap-oracle --discover
+        tap-oracle --discover
       env:
         TAP_ORACLE_HOSTNAME: localhost
         TAP_ORACLE_PORT: 1521
         TAP_ORACLE_PASS: admin
         TAP_ORACLE_USER: SYS
         TAP_ORACLE_SERVICE_NAME: FREEPDB1
+        TAP_ORACLE_ORA_PYTHON_DRIVER_TYPE: ${{ matrix.oracle-driver }}

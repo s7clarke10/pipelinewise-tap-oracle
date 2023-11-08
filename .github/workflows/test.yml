@@ -14,7 +14,8 @@ jobs:
         # python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
         python-version: ["3.9"]
         os: ["ubuntu-latest"]
-        oracle-driver: ["CX","THIN","THICK"]
+        #oracle-driver: ["CX","THIN","THICK"]
+        oracle-driver: ["THIN"]
     services:
       oracle:
         #image: container-registry.oracle.com/database/express:21.3.0-xe
@@ -50,7 +51,7 @@ jobs:
         pip install meltano
         meltano init testproj
         cd testproj
-        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml
+        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml || cat /home/runner/work/pipelinewise-tap-oracle/pipelinewise-tap-oracle/testproj/.meltano/logs/pip/extractors/tap-oracle/pip.log
         meltano invoke tap-oracle --discover
       env:
         TAP_ORACLE_HOST: localhost

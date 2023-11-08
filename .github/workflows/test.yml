@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   test:
-    name: "Run tap-oracle on py${{ matrix.python-version }} (OS: ${{ matrix.os }}, Driver: ${{ matrix.oracledriver }})"
+    name: "Run tap-oracle on py${{ matrix.python-version }} (OS: ${{ matrix.os }}, Driver: ${{ matrix.oracle-driver }})"
     runs-on: ${{ matrix.os }}
     env:
       GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -32,9 +32,10 @@ jobs:
     - name: Install tap
       run: |
         pip install .
-    - name: Run a test discovery
+        pip install nose
+    - name: Run nosetests
       run: |
-        tap-oracle --discover
+        nosetests
       env:
         TAP_ORACLE_HOSTNAME: localhost
         TAP_ORACLE_PORT: 1521

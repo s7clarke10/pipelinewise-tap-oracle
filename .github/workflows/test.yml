@@ -20,6 +20,7 @@ jobs:
       oracle:
         #image: container-registry.oracle.com/database/express:21.3.0-xe
         image: container-registry.oracle.com/database/free:23.2.0.0
+        options: --name oracle
         env:
           ORACLE_PWD: admin  # SYS, SYSTEM and PDBADMIN password
         ports:
@@ -31,21 +32,20 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Oracle Client
+    - name: Install Oracle Instantclient
       if: matrix.oracle-driver != 'THIN'
       run: |
-        apt-get update \
-        && apt-get install -y unzip libaio1 \
-        && apt-get clean \
-        && find /var/cache/apt/archives /var/lib/apt/lists -not -name lock -type f -delete
-      
-  
-        # Install the Oracle Client
-        mkdir /opt/oracle \
-        && cd ~ \
-        && curl -O https://download.oracle.com/otn_software/linux/instantclient/1912000/instantclient-basic-linux.x64-19.12.0.0.0dbru.zip \
-        && unzip instantclient-basic-linux.x64-19.12.0.0.0dbru.zip -d /opt/oracle \
-        && rm instantclient-basic-linux.x64-19.12.0.0.0dbru.zip
+        chmod +x ${{ github.workspace }}/.github/scripts/install_oracle_instantclient.sh
+        ${{ github.workspace }}/.github/scripts/install_oracle_instantclient.sh
+
+    - name: Copy Create User script
+      run: |
+        chmod +x ${{ github.workspace }}/.github/scripts/create_new_user.sh
+        docker cp ${{ github.workspace }}/.github/scripts/create_new_user.sh oracle:/home/oracle/create_new_user.sh
+
+    - name: Create tap test user
+      run: |
+        docker exec oracle /home/oracle/create_new_user.sh tap_test admin
     - name: Install tap in meltano
       run: |
         pip install meltano
@@ -57,10 +57,8 @@ jobs:
         TAP_ORACLE_HOST: localhost
         TAP_ORACLE_PORT: 1521
         TAP_ORACLE_PASSWORD: admin
-        TAP_ORACLE_USER: SYS
+        TAP_ORACLE_USER: tap_test
         TAP_ORACLE_SERVICE_NAME: FREEPDB1
         TAP_ORACLE_ORA_PYTHON_DRIVER_TYPE: ${{ matrix.oracle-driver }}
-        #ORACLE_HOME: /opt/oracle/instantclient_19_12
-        #PATH: $PATH:$ORACLE_HOME
-        #LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$ORACLE_HOME
-        #TNS_ADMIN: $ORACLE_HOME/network/admin
+        LD_LIBRARY_PATH: /opt/oracle/instantclient_21_6
+        TNS_ADMIN: /opt/tns_admin

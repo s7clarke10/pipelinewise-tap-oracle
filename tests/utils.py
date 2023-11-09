@@ -33,8 +33,8 @@ def get_test_connection():
     creds = get_test_conn_config()
     conn_string = '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={})(PORT={}))(CONNECT_DATA=(SID={})))'.format(creds['host'], creds['port'], creds['sid'])
     conn_config = {
-        'user': config["user"],
-        'password': config["password"],
+        'user': creds["user"],
+        'password': creds["password"],
         'dsn': conn_string
     }
     if SQLNET_ORA_CONFIG is not None:

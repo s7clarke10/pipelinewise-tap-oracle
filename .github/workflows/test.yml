@@ -1,0 +1,69 @@
+name: Test tap-oracle
+
+on:
+  push:
+    branches: 
+     - main
+  pull_request:
+    branches: 
+     - main
+
+jobs:
+  test:
+    name: "Run tap-oracle on py${{ matrix.python-version }} (OS: ${{ matrix.os }}, Driver: ${{ matrix.oracle-driver }})"
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    env:
+      GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    strategy:
+      matrix:
+        # python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.9"]
+        os: ["ubuntu-latest"]
+        oracle-driver: ["CX","THIN","THICK"]
+    services:
+      oracle:
+        #image: container-registry.oracle.com/database/express:21.3.0-xe
+        image: container-registry.oracle.com/database/free:23.2.0.0
+        options: --name oracle
+        env:
+          ORACLE_PWD: admin  # SYS, SYSTEM and PDBADMIN password
+        ports:
+          - 1521:1521
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install Oracle Instantclient
+      if: matrix.oracle-driver != 'THIN'
+      run: |
+        chmod +x ${{ github.workspace }}/.github/scripts/install_oracle_instantclient.sh
+        ${{ github.workspace }}/.github/scripts/install_oracle_instantclient.sh
+
+    - name: Copy Create User script
+      run: |
+        chmod +x ${{ github.workspace }}/.github/scripts/create_new_user.sh
+        docker cp ${{ github.workspace }}/.github/scripts/create_new_user.sh oracle:/home/oracle/create_new_user.sh
+
+    - name: Create tap test user
+      run: |
+        docker exec oracle /home/oracle/create_new_user.sh tap_test admin
+    - name: Install tap in meltano
+      run: |
+        pip install meltano
+        meltano init testproj
+        cd testproj
+        meltano add extractor tap-oracle --from-ref ../tap-oracle.yml || cat ${{ github.workspace }}/testproj/.meltano/logs/pip/extractors/tap-oracle/pip.log
+        meltano invoke tap-oracle --discover
+      env:
+        TAP_ORACLE_HOST: localhost
+        TAP_ORACLE_PORT: 1521
+        TAP_ORACLE_PASSWORD: admin
+        TAP_ORACLE_USER: tap_test
+        TAP_ORACLE_SERVICE_NAME: FREEPDB1
+        TAP_ORACLE_ORA_PYTHON_DRIVER_TYPE: ${{ matrix.oracle-driver }}
+        LD_LIBRARY_PATH: /opt/oracle/instantclient_21_6
+        TNS_ADMIN: /opt/tns_admin

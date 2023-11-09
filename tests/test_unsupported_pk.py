@@ -1,22 +1,31 @@
-import unittest
+import datetime
 import os
-import cx_Oracle, sys, string, datetime
-import tap_oracle
 import pdb
+import string
+import sys
+import unittest
+
 import singer
+import tap_oracle
 from singer import get_logger, metadata, write_bookmark
+
 try:
-    from tests.utils import get_test_connection, get_test_conn_config, ensure_test_table, select_all_of_stream, set_replication_method_for_stream, crud_up_log_miner_fixtures, verify_crud_messages, insert_record, unselect_column
+    from tests.utils import (crud_up_log_miner_fixtures, ensure_test_table,
+                             get_test_conn_config, get_test_connection,
+                             insert_record, select_all_of_stream,
+                             set_replication_method_for_stream,
+                             unselect_column, verify_crud_messages)
 except ImportError:
     from utils import get_test_connection, ensure_test_table, select_all_of_stream, set_replication_method_for_stream, crud_up_log_miner_fixtures, verify_crud_messages, insert_record, unselect_column
 
-import tap_oracle.sync_strategies.log_miner as log_miner
-import tap_oracle.sync_strategies.full_table as full_table
+import copy
 import decimal
 import math
+
 import pytz
 import strict_rfc3339
-import copy
+import tap_oracle.sync_strategies.full_table as full_table
+import tap_oracle.sync_strategies.log_miner as log_miner
 
 LOGGER = get_logger()
 

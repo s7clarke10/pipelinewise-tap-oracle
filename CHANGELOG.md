@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+ * Adding new optional configuration setting 'ora_python_driver_type'.
+   This setting allows you to pick which driver, mode to operate in.
+
 ## 1.2.5
  * Resolving bug in the filter_sys_or_not function to handle an empty schema filter.
    The fix also allows the SYS schema to be anywhere in the list.

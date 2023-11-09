@@ -1,14 +1,19 @@
-import unittest
-import sys, string, datetime
-import tap_oracle
+import datetime
 import os
 import pdb
-from singer import get_logger
+import string
+import sys
+import unittest
+
+import tap_oracle
 import tap_oracle.sync_strategies.full_table as full_table
+from singer import get_logger
+
 try:
-    from tests.utils import get_test_connection, get_test_conn_config, ensure_test_table
+    from tests.utils import (ensure_test_table, get_test_conn_config,
+                             get_test_connection)
 except ImportError:
-    from utils import get_test_connection, ensure_test_table
+    from utils import ensure_test_table, get_test_connection
 
 LOGGER = get_logger()
 

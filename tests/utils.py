@@ -1,12 +1,12 @@
-from singer import get_logger, metadata
-from nose.tools import nottest
-
-import singer
-import os
+import datetime
 import decimal
 import math
-import datetime
-from tap_oracle.connection_helper import oracledb, SQLNET_ORA_CONFIG
+import os
+
+import singer
+from nose.tools import nottest
+from singer import get_logger, metadata
+from tap_oracle.connection_helper import SQLNET_ORA_CONFIG, oracledb
 
 LOGGER = get_logger()
 

@@ -1,5 +1,5 @@
 import singer
-from tap_oracle.connection_helper import oracledb, SQLNET_ORA_CONFIG
+from tap_oracle.connection_helper import SQLNET_ORA_CONFIG, oracledb
 
 LOGGER = singer.get_logger()
 

@@ -230,7 +230,7 @@ A numeric setting adjusting the internal buffersize. The common query tuning sce
 
 Optional:
 
-A setting which will dynamically import the correct Oracle Library and set the connection mode. This allows you to select the legacy 'cx' Oracle driver library or the newer 'oracledb' library. With the newer 'oracledb' library you can run it in either 'thick' or 'thin' mode. Under thin mode you can pass specific driver settings like 'https_proxy' if and as required via environment variables.
+A setting which will dynamically import the correct Oracle Library and set the connection mode. This allows you to select the legacy 'cx' Oracle driver library or the newer 'oracledb' library. With the newer 'oracledb' library you can run it in either 'thick' or 'thin' mode. Under thin mode you can pass specific driver settings like 'https_proxy' if and as required via config settings.
 
 ```json
 {

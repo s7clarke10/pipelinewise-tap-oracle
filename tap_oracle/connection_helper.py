@@ -15,6 +15,8 @@ Copyright (c) 2020, Vitor Avancini
   limitations under the License.
 """
 import enum
+import os
+
 from singer import get_logger, utils
 
 LOGGER = get_logger()
@@ -28,7 +30,7 @@ REQUIRED_CONFIG_KEYS = [
 
 class OracleNetConfig(dict):
     """The sqlnet.ora file is only supported in the python-oracledb Thick mode.
-    In Thin mode, the user can pass these as environment variables
+    In Thin mode, the user can pass these as tap config settings
 
       - ssl_server_cert_dn: the distinguished name (DN) which should be
         matched with the server. This value is ignored if the
@@ -101,13 +103,17 @@ class OracleDriverType(str, enum.Enum):
 SQLNET_ORA_CONFIG = None
 args = utils.parse_args(REQUIRED_CONFIG_KEYS)
 
-# Set the environment variable ORA_PYTHON_DRIVER_TYPE to one of “cx”, “thin”, or “thick”:
-ORA_PYTHON_DRIVER_TYPE = args.config.get('ora_python_driver_type', 'cx').upper()
+# Set the environment variable ORA_PYTHON_DRIVER_TYPE to one of "cx", "thin", or "thick":
+if os.getenv('ORA_PYTHON_DRIVER_TYPE'):
+   ORA_PYTHON_DRIVER_TYPE = os.getenv('ORA_PYTHON_DRIVER_TYPE').upper()
+else:
+   ORA_PYTHON_DRIVER_TYPE = args.config.get('ora_python_driver_type', OracleDriverType.CX_ORACLE).upper()
+
 if ORA_PYTHON_DRIVER_TYPE == OracleDriverType.CX_ORACLE:
     LOGGER.info("Running in cx mode")
     description = (
         f"cx_oracle is no longer maintained, use python-oracledb"
-        f"\n\nTo switch to python-oracledb set the environment variable ORA_PYTHON_DRIVER_TYPE=thin "
+        f"\n\nTo switch to python-oracledb set the environment variable ORA_PYTHON_DRIVER_TYPE=thin or thick."
         f"\n\nDocumentation for python-oracledb can be found here: "
         f"https://oracle.github.io/python-oracledb/"
     )

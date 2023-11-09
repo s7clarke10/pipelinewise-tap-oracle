@@ -1,11 +1,11 @@
-import re
-import singer
-from singer import  metadata
-import decimal
-import datetime
-import dateutil.parser
-
 import base64
+import datetime
+import decimal
+import re
+
+import dateutil.parser
+import singer
+from singer import metadata
 from tap_oracle.connection_helper import oracledb
 
 def should_sync_column(metadata, field_name):

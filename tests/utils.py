@@ -1,12 +1,12 @@
-from singer import get_logger, metadata
-from nose.tools import nottest
-
-import singer
-import os
+import datetime
 import decimal
 import math
-import datetime
-from tap_oracle.connection_helper import oracledb, SQLNET_ORA_CONFIG
+import os
+
+import singer
+from nose.tools import nottest
+from singer import get_logger, metadata
+from tap_oracle.connection_helper import SQLNET_ORA_CONFIG, oracledb
 
 LOGGER = get_logger()
 
@@ -33,8 +33,8 @@ def get_test_connection():
     creds = get_test_conn_config()
     conn_string = '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={})(PORT={}))(CONNECT_DATA=(SID={})))'.format(creds['host'], creds['port'], creds['sid'])
     conn_config = {
-        'user': config["user"],
-        'password': config["password"],
+        'user': creds["user"],
+        'password': creds["password"],
         'dsn': conn_string
     }
     if SQLNET_ORA_CONFIG is not None:

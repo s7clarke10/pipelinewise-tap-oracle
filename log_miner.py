@@ -7,11 +7,14 @@ Purpose:        Simple program to process redo log changes
 ------------------------------------------------------------------------
 """
  
-import sys, string, _thread, datetime
-from threading import Lock
-from threading import Thread
-from tap_oracle.connection_helper import oracledb, SQLNET_ORA_CONFIG
+import _thread
+import datetime
+import string
+import sys
+from threading import Lock, Thread
+
 from singer import utils
+from tap_oracle.connection_helper import SQLNET_ORA_CONFIG, oracledb
  
 plock = _thread.allocate_lock()
  

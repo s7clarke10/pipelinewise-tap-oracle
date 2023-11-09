@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
-import singer
-import decimal
+import copy
 import datetime
+import decimal
+import pdb
+import time
+
 import dateutil.parser
-from singer import utils, write_message, get_bookmark
+import pytz
+import singer
 import singer.metadata as metadata
 import singer.metrics as metrics
-from singer.schema import Schema
 import tap_oracle.db as orc_db
-import copy
-import pdb
-import pytz
-import time
 import tap_oracle.sync_strategies.common as common
+from singer import get_bookmark, utils, write_message
+from singer.schema import Schema
 from tap_oracle.connection_helper import oracledb
 
 LOGGER = singer.get_logger()

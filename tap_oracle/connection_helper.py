@@ -30,7 +30,7 @@ REQUIRED_CONFIG_KEYS = [
 
 class OracleNetConfig(dict):
     """The sqlnet.ora file is only supported in the python-oracledb Thick mode.
-    In Thin mode, the user can pass these as environment variables
+    In Thin mode, the user can pass these as tap config settings
 
       - ssl_server_cert_dn: the distinguished name (DN) which should be
         matched with the server. This value is ignored if the

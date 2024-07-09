@@ -98,7 +98,19 @@ Before you can use tap-oracle, you need to download and install Oracle Client so
 
 The following script is an Example for running this tap in a Docker Container and it a snippet of code from a `Dockerfile`. An equivalent setup can be done as a one-off in a Linux Server by way of example with appropriate environment variables set in a .bash_profile or appropriate shell for your environment.
 
+Note: The legacy cx_Oracle library is not available on MacOS. The setup.py will ignore installing the library for a MacOS, the ora_python_driver_type becomes mandatory with a value of thin for the client mode.
+
 ```shell
+# For more details on the Oracle CX_Oracle library refer to 
+# https://cx-oracle.readthedocs.io/en/latest/
+# For more details on the Oracle oracledb library ref to
+# https://oracle.github.io/python-oracledb/
+# Install the libaio1 library for the Oracle Client, unzip
+RUN apt-get update \
+    && apt-get install -y unzip libaio1 \
+    && apt-get clean \
+    && find /var/cache/apt/archives /var/lib/apt/lists -not -name lock -type f -delete
+
 # Install the Oracle Client
 RUN mkdir /opt/oracle \
     && cd ~ \
@@ -132,6 +144,7 @@ Recommended optional settings
 * `"filter_tables": ["SCHEMA-TABLE1", "SCHEMA-TABLE1"]` - this will speed up discovery to just the listed tables.
 * `"use_singer_decimal": true`        - This will help avoid numeric rounding issues emitting as a string with a format of singer.decimal.
 * `"cursor_array_size": 10000` - This will help speed up extracts over a WAN or low latency network. The default is 1000.
+* `"ora_python_driver_type": "cx|thick|thin"` - Provides an option to specify a Oracle driver library to use. The default is cx.
 
 Optional:
 
@@ -212,6 +225,16 @@ A numeric setting adjusting the internal buffersize. The common query tuning sce
 ```json
 {
   "cursor_array_size": 10000,
+}
+```
+
+Optional:
+
+A setting which will dynamically import the correct Oracle Library and set the connection mode. This allows you to select the legacy 'cx' Oracle driver library or the newer 'oracledb' library. With the newer 'oracledb' library you can run it in either 'thick' or 'thin' mode. Under thin mode you can pass specific driver settings like 'https_proxy' if and as required via config settings.
+
+```json
+{
+  "ora_python_driver_type": "thin",
 }
 ```
 

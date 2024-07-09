@@ -7,10 +7,14 @@ Purpose:        Simple program to process redo log changes
 ------------------------------------------------------------------------
 """
  
-import cx_Oracle, sys, string, _thread, datetime
-from threading import Lock
-from threading import Thread
+import _thread
+import datetime
+import string
+import sys
+from threading import Lock, Thread
+
 from singer import utils
+from tap_oracle.connection_helper import SQLNET_ORA_CONFIG, oracledb
  
 plock = _thread.allocate_lock()
  
@@ -36,8 +40,15 @@ class readRedoThread(Thread):
     self.t = threadNum
  
   def run(self):
-    #dsn = cx_Oracle.makedsn('127.0.0.1', 1521, 'ORCL') 
-    conn = cx_Oracle.connect('root', 'BiouTaSeCtOmPavA', '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SID=ORCL)))')
+    #dsn = oracledb.makedsn('127.0.0.1', 1521, 'ORCL')
+    conn_config = {
+        'user': 'root',
+        'password': 'BiouTaSeCtOmPavA',
+        'dsn': '(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SID=ORCL)))'
+    }
+    if SQLNET_ORA_CONFIG is not None:
+        conn_config.update(SQLNET_ORA_CONFIG)
+    conn = oracledb.connect(**conn_config)
     cursor = conn.cursor()
     contents = conn.cursor()
  
@@ -104,7 +115,7 @@ class readRedoThread(Thread):
                 #print("Something bad happened:")
                 pass
 
-        except cx_Oracle.DatabaseError as ex:
+        except oracledb.DatabaseError as ex:
             pass
             #print("Exception at row:", row, ex)
 
@@ -130,8 +141,15 @@ def get_logs(config):
     #endTime = datetime.datetime.now()
     #print(startTime)
 
-    conn = cx_Oracle.connect(config["user"], config["password"], cx_Oracle.makedsn(config["host"], config["port"], 'ORCL'))
-    #conn = cx_Oracle.connect(mode = cx_Oracle.SYSDBA)
+    conn_config = {
+        'user': config["user"],
+        'password': config["password"],
+        'dsn': oracledb.makedsn(config["host"], config["port"], 'ORCL')
+    }
+    if SQLNET_ORA_CONFIG is not None:
+        conn_config.update(SQLNET_ORA_CONFIG)
+    conn = oracledb.connect(**conn_config)
+    #conn = oracledb.connect(mode = oracledb.SYSDBA)
     cursor = conn.cursor()
     cursor.execute("select distinct thread# from v$archived_log where first_time >= :1 and next_time <= :2",[startTime,endTime])
 

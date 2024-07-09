@@ -1,8 +1,16 @@
 # Changelog
 
+## 2.0.0
+ * Updating to a patched version of pipelinewise-singer-python using msgspec instead of orjson for serialization.
+ * Speeding up tap-oracle via the use of new pipelinewise-singer-python library.
+ * deprecating support for Python 3.7, and adding support for Python 3.11 and 3.12 via pipelinewise-singer-python.
+   
 ## 1.3.0
- * Adding new optional configuration setting 'ora_python_driver_type'.
-   This setting allows you to pick which driver, mode to operate in.
+ * Adding new optional configuration setting 'ora_python_driver_type'. This setting allows you to pick which Oracle Library Driver / mode to operate in.
+
+ * cx : cx_Oracle (Use the legacy cx_Oracle library - default)
+ * thin: oracledb (Use thin mode - no Oracle Client required. Required for MacOS)
+ * thick: oracledb (Use thick mode - use Oracle Client)
 
 ## 1.2.5
  * Resolving bug in the filter_sys_or_not function to handle an empty schema filter.

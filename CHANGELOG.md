@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.1
+ * Updating to a pypi version of singer-python (realit-singer-python)
+
 ## 2.0.0
  * Updating to a patched version of pipelinewise-singer-python using msgspec instead of orjson for serialization.
  * Speeding up tap-oracle via the use of new pipelinewise-singer-python library.
